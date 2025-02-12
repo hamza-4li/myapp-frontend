@@ -5,9 +5,12 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import PasswordInput from "@/components/passwordInput";
 import { validateFullName, validateEmail, validatePassword } from "@/utils/validation";
+import AnimatedButton from "@/components/Button";
+import BeatLoader from 'react-spinners/BeatLoader';
 
 export default function Signup() {
     const router = useRouter();
+    const [loading, setLoading] = useState(false); // Loading state
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -48,10 +51,13 @@ export default function Signup() {
         }
 
         try {
+            setLoading(true); // Start loading
             await axios.post("https://myapp-backend-production.up.railway.app/api/auth/register", formData);
             router.push("/login");  // Redirect to login page after successful signup
         } catch (error) {
             console.error("Signup failed:", error.response?.data?.message || error.message);
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
@@ -99,11 +105,10 @@ export default function Signup() {
                     {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
 
                     {/* Submit Button */}
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-xl shadow-md hover:bg-blue-700 transition duration-200"
-                    >
-                        Sign Up
+                    <button type="submit" className=" mt-4 w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+                        {
+                            loading ? <BeatLoader color='#fff' /> : "sign up"
+                        }
                     </button>
                 </form>
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/authContext';
+import BeatLoader from 'react-spinners/BeatLoader';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ export default function ForgotPassword() {
     const [error, setError] = useState('');
     const router = useRouter();
     const { user } = useAuth();
+    const [loading, setLoading] = useState(false); // Loading state
 
     useEffect(() => {
         if (user) {
@@ -23,12 +25,22 @@ export default function ForgotPassword() {
         setError('');
 
         try {
+            setLoading(true); // Start loading
             const response = await axios.post('https://myapp-backend-production.up.railway.app/api/auth/forgot-password', { email });
             setMessage(response.data.message);
             // Redirect to OTP verification page
-            router.push('/verify-otp');
+
+            if (response.status === 200) {
+                console.log('setting mail', email);
+
+                localStorage.setItem("forgotPasswordEmail", email);
+
+                router.push('/verify-otp');
+            }
         } catch (error) {
             setError(error.response?.data?.message || 'Failed to send OTP.');
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
@@ -47,11 +59,10 @@ export default function ForgotPassword() {
                             required
                         />
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
-                    >
-                        Send OTP
+                    <button type="submit" className=" mt-4 w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+                        {
+                            loading ? <BeatLoader color='#fff' /> : "Send OTP"
+                        }
                     </button>
                 </form>
                 {message && <p className="text-green-500 mt-4 text-center">{message}</p>}

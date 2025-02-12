@@ -3,6 +3,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
+import BeatLoader from 'react-spinners/BeatLoader';
 
 export default function ResetPassword() {
     const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ export default function ResetPassword() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const router = useRouter();
+    const [loading, setLoading] = useState(false); // Loading state
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -22,18 +24,34 @@ export default function ResetPassword() {
         setMessage('');
         setError('');
 
+        const storedEmail = localStorage.getItem("forgotPasswordEmail"); // Geting the email from the forgot password page
+
+        if (!storedEmail) {
+            console.error("No email found. Please go back to the forgot-password page.");
+            router.push("/forgot-password");
+            return;
+        }
+
         if (newPassword !== confirmPassword) {
             setError("Passwords do not match.");
             return;
         }
 
         try {
-            const response = await axios.post('https://myapp-backend-production.up.railway.app/api/auth/reset-password', { email, newPassword });
+            setLoading(true); // Start loading
+            const response = await axios.post('https://myapp-backend-production.up.railway.app/api/auth/reset-password', {
+                email: storedEmail,
+                newPassword
+            });
             setMessage(response.data.message);
+            // Clear the email from localStorage after password reset
+            localStorage.removeItem("forgotPasswordEmail");
             // Redirect to login page after successful password reset
             router.push('/login');
         } catch (error) {
             setError(error.response?.data?.message || 'Password reset failed.');
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
@@ -42,7 +60,7 @@ export default function ResetPassword() {
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
                 <h2 className="text-2xl font-bold mb-6 text-center">Reset Password</h2>
                 <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
+                    {/* <div className="mb-4">
                         <label className="block text-gray-700">Email</label>
                         <input
                             type="email"
@@ -51,7 +69,7 @@ export default function ResetPassword() {
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                             required
                         />
-                    </div>
+                    </div> */}
                     <div className="mb-4 relative">
                         <label className="block text-gray-700">New Password</label>
                         <input
@@ -84,11 +102,10 @@ export default function ResetPassword() {
                             {showPassword ? <EyeOff /> : <Eye />}
                         </span>
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
-                    >
-                        Reset Password
+                    <button type="submit" className=" mt-4 w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+                        {
+                            loading ? <BeatLoader color='#fff' /> : "Reset Password"
+                        }
                     </button>
                 </form>
                 {message && <p className="text-green-500 mt-4 text-center">{message}</p>}

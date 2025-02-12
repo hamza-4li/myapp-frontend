@@ -4,20 +4,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/authContext";
+import BeatLoader from 'react-spinners/BeatLoader';
 
 export default function Dashboard() {
     const router = useRouter();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    // const { userr } = useAuth();
 
-    // useEffect(() => {
-    //     if (!userr) {
-    //         router.push('/login'); // Redirect to login if not authenticated
-    //     }
-    // }, [userr, router]);
-
-    // if (!userr) return null; // Prevent rendering if not authenticated
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -29,6 +22,7 @@ export default function Dashboard() {
             }
 
             try {
+                setLoading(true); // Start loading
                 const response = await axios.get("https://myapp-backend-production.up.railway.app/api/auth/profile", {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -60,6 +54,7 @@ export default function Dashboard() {
                 <button
                     onClick={() => {
                         localStorage.removeItem("token");  // Clear token
+                        localStorage.removeItem("forgotPasswordEmail");  // Clear stored email
                         router.push("/login");  // Redirect to login
                     }}
                     className="w-full mt-6 bg-red-500 text-white py-2 px-4 rounded-xl shadow-md hover:bg-red-600 transition duration-200"

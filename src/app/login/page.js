@@ -5,9 +5,11 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import PasswordInput from "@/components/passwordInput";
 import { validateEmail, validatePassword } from "@/utils/validation";
+import BeatLoader from 'react-spinners/BeatLoader';
 
 export default function Login() {
     const router = useRouter();
+    const [loading, setLoading] = useState(false); // Loading state
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -46,6 +48,7 @@ export default function Login() {
         }
 
         try {
+            setLoading(true); // Start loading
             const response = await axios.post("https://myapp-backend-production.up.railway.app/api/auth/login", formData);
 
             // Store JWT token in localStorage
@@ -55,6 +58,8 @@ export default function Login() {
             router.push("/dashboard");
         } catch (error) {
             setApiError(error.response?.data?.message || "Login failed. Please try again.");
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
@@ -92,11 +97,10 @@ export default function Login() {
                     {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
 
                     {/* Submit Button */}
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-xl shadow-md hover:bg-blue-700 transition duration-200"
-                    >
-                        Log In
+                    <button type="submit" className=" mt-4 w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+                        {
+                            loading ? <BeatLoader color='#fff' /> : "Log In"
+                        }
                     </button>
                 </form>
 
