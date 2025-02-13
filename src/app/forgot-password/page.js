@@ -27,14 +27,10 @@ export default function ForgotPassword() {
         try {
             setLoading(true); // Start loading
             const response = await axios.post('https://myapp-backend-production.up.railway.app/api/auth/forgot-password', { email });
-            setMessage(response.data.message);
-            // Redirect to OTP verification page
-
+            setMessage(response.data.message); // Redirect to OTP verification page
             if (response.status === 200) {
                 console.log('setting mail', email);
-
                 localStorage.setItem("forgotPasswordEmail", email);
-
                 router.push('/verify-otp');
             }
         } catch (error) {

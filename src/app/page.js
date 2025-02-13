@@ -1,5 +1,4 @@
 'use client';
-
 import Navbar from '@/components/navBar';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -19,7 +18,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
-
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center text-center py-20 px-4">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
@@ -34,7 +32,6 @@ export default function HomePage() {
           </button>
         </Link>
       </section>
-
       {/* Features Section */}
       <section className="bg-white py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -64,7 +61,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-4 text-center">
         <p>&copy; {new Date().getFullYear()} AuthApp. All rights reserved.</p>

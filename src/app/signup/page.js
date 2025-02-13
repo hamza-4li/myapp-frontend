@@ -11,6 +11,12 @@ import BeatLoader from 'react-spinners/BeatLoader';
 export default function Signup() {
     const router = useRouter();
     const [loading, setLoading] = useState(false); // Loading state
+    const [errors, setErrors] = useState({});
+    const [formData, setFormData] = useState({
+        fullname: "",
+        email: "",
+        password: "",
+    });
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -19,14 +25,6 @@ export default function Signup() {
         }
     }, []);
 
-    const [formData, setFormData] = useState({
-        fullname: "",
-        email: "",
-        password: "",
-    });
-
-    const [errors, setErrors] = useState({});
-
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -34,22 +32,16 @@ export default function Signup() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = {};
-
         if (!validateFullName(formData.fullname)) {
             validationErrors.fullname = "Full name should contain only letters and spaces.";
         }
         if (!validateEmail(formData.email)) {
             validationErrors.email = "Invalid email format.";
         }
-        // if (!validatePassword(formData.password)) {
-        //     validationErrors.password = "Password must be at least 8 characters, include uppercase, lowercase, number, and special character.";
-        // }
-
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
         }
-
         try {
             setLoading(true); // Start loading
             await axios.post("https://myapp-backend-production.up.railway.app/api/auth/register", formData);
@@ -65,7 +57,6 @@ export default function Signup() {
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
                 <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Sign Up</h2>
-
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Full Name */}
                     <div>
@@ -76,11 +67,9 @@ export default function Signup() {
                             value={formData.fullname}
                             onChange={handleChange}
                             placeholder="Enter your full name"
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
-                        />
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-black" />
                         {errors.fullname && <p className="text-red-500 text-sm mt-1">{errors.fullname}</p>}
                     </div>
-
                     {/* Email */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Email</label>
@@ -94,7 +83,6 @@ export default function Signup() {
                         />
                         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                     </div>
-
                     {/* Password with Eye Toggle */}
                     <PasswordInput
                         label="Password"
@@ -103,7 +91,6 @@ export default function Signup() {
                         placeholder="Enter your password"
                     />
                     {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-
                     {/* Submit Button */}
                     <button type="submit" className=" mt-4 w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
                         {
@@ -111,7 +98,6 @@ export default function Signup() {
                         }
                     </button>
                 </form>
-
                 {/* Redirect to Login */}
                 <p className="mt-4 text-center text-sm text-gray-600">
                     Already have an account?{" "}

@@ -10,6 +10,12 @@ import BeatLoader from 'react-spinners/BeatLoader';
 export default function Login() {
     const router = useRouter();
     const [loading, setLoading] = useState(false); // Loading state
+    const [errors, setErrors] = useState({});
+    const [apiError, setApiError] = useState("");
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+    });
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -17,14 +23,6 @@ export default function Login() {
             router.push("/dashboard");  // Redirect to dashboard if already logged in
         }
     }, [router]);
-
-    const [formData, setFormData] = useState({
-        email: "",
-        password: "",
-    });
-
-    const [errors, setErrors] = useState({});
-    const [apiError, setApiError] = useState("");
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,10 +36,6 @@ export default function Login() {
             validationErrors.email = "Invalid email format.";
         }
 
-        // if (!validatePassword(formData.password)) {
-        //   validationErrors.password = "Password must be at least 8 characters with uppercase, lowercase, number, and special character.";
-        // }
-
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
@@ -50,12 +44,8 @@ export default function Login() {
         try {
             setLoading(true); // Start loading
             const response = await axios.post("https://myapp-backend-production.up.railway.app/api/auth/login", formData);
-
-            // Store JWT token in localStorage
-            localStorage.setItem("token", response.data.token);
-
-            // Redirect to dashboard on successful login
-            router.push("/dashboard");
+            localStorage.setItem("token", response.data.token); // Store JWT token in localStorage
+            router.push("/dashboard"); // Redirect to dashboard on successful login
         } catch (error) {
             setApiError(error.response?.data?.message || "Login failed. Please try again.");
         } finally {
@@ -67,11 +57,9 @@ export default function Login() {
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
                 <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Log In</h2>
-
                 {apiError && (
                     <p className="text-red-500 text-center mb-4">{apiError}</p>
                 )}
-
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Email */}
                     <div>
@@ -86,7 +74,6 @@ export default function Login() {
                         />
                         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                     </div>
-
                     {/* Password with Eye Toggle */}
                     <PasswordInput
                         label="Password"
@@ -95,7 +82,6 @@ export default function Login() {
                         placeholder="Enter your password"
                     />
                     {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-
                     {/* Submit Button */}
                     <button type="submit" className=" mt-4 w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
                         {
@@ -103,7 +89,6 @@ export default function Login() {
                         }
                     </button>
                 </form>
-
                 {/* Redirect to Signup */}
                 <p className="mt-4 text-center text-sm text-gray-600">
                     Don't have an account?{" "}

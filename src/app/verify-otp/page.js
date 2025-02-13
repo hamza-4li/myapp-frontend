@@ -13,6 +13,7 @@ export default function VerifyOTP() {
     const [error, setError] = useState('');
     const router = useRouter();
     const [loading, setLoading] = useState(false); // Loading state
+    const [storedEmail, setStoredEmail] = useState(null);
 
     // Resend OTP functionality
     useEffect(() => {
@@ -25,23 +26,34 @@ export default function VerifyOTP() {
         } else {
             setShowResend(true); // Show Resend OTP button when timer hits 0
         }
-
     }, [timer]);
 
-    const storedEmail = JSON.parse(localStorage.getItem("forgotPasswordEmail"));
+    // LocalStorage Issue solution
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const email = localStorage.getItem("forgotPasswordEmail");
+            if (email) {
+                setStoredEmail(email);
+            } else {
+                console.error("No email found. Please go back to the forgot-password page.");
+                router.push("/forgot-password");
+            }
+        }
+    }, []);
 
+    if (!storedEmail) return null;  // Prevents rendering before the email is loaded
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
         setError('');
 
-        const storedEmail = localStorage.getItem("forgotPasswordEmail"); // geting the email address from the forgot password page
-        if (!storedEmail) {
-            console.error("No email found. Please go back to the forgot-password page.");
-            router.push("/forgot-password");
-            return;
-        }
+        // const storedEmail = localStorage.getItem("forgotPasswordEmail"); // geting the email address from the forgot password page
+        // if (!storedEmail) {
+        //     console.error("No email found. Please go back to the forgot-password page.");
+        //     router.push("/forgot-password");
+        //     return;
+        // }
 
         try {
             setLoading(true); // Start loading
@@ -49,6 +61,7 @@ export default function VerifyOTP() {
                 email: storedEmail,
                 otp
             });
+
             // const email = localStorage.getItem('email', email) // taking data from the local storage
             setMessage(response.data.message);
             // Redirect to reset password page after successful verification
@@ -63,7 +76,6 @@ export default function VerifyOTP() {
         const handleResendOTP = async () => {
             setShowResend(false); // Hide the resend button
             setTimer(30); // Reset the timer
-
             try {
                 await axios.post("https://myapp-backend-production.up.railway.app/api/auth/forgot-password", { email: storedEmail });
                 console.log("OTP Resent Successfully");
@@ -73,23 +85,11 @@ export default function VerifyOTP() {
         };
     };
 
-
-
     return (
         <div className="flex justify-center items-center h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
                 <h2 className="text-2xl font-bold mb-6 text-center">Verify OTP</h2>
                 <form onSubmit={handleSubmit}>
-                    {/* <div className="mb-4">
-                        <label className="block text-gray-700">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            required
-                        />
-                    </div> */}
                     <div className="mb-4">
                         <label className="block text-gray-700">OTP</label>
                         <input
@@ -97,21 +97,18 @@ export default function VerifyOTP() {
                             value={otp}
                             onChange={(e) => setOtp(e.target.value)}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            required
-                        />
+                            required />
                     </div>
                     <button type="submit" className=" mt-4 w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
                         {
                             loading ? <BeatLoader color='#fff' /> : "Verify OTP"
                         }
                     </button>
-
                     {/* Resend Password Button */}
                     {showResend ? (
                         <button
                             onClick={handleResendOTP}
-                            className="mt-4 text-blue-500 underline"
-                        >
+                            className="mt-4 text-blue-500 underline">
                             Resend OTP
                         </button>
                     ) : (

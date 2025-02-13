@@ -44,10 +44,8 @@ export default function ResetPassword() {
                 newPassword
             });
             setMessage(response.data.message);
-            // Clear the email from localStorage after password reset
-            localStorage.removeItem("forgotPasswordEmail");
-            // Redirect to login page after successful password reset
-            router.push('/login');
+            localStorage.removeItem("forgotPasswordEmail"); // Clear the email from localStorage after password reset
+            router.push('/login');// Redirect to login page after successful password reset
         } catch (error) {
             setError(error.response?.data?.message || 'Password reset failed.');
         } finally {
@@ -60,16 +58,6 @@ export default function ResetPassword() {
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
                 <h2 className="text-2xl font-bold mb-6 text-center">Reset Password</h2>
                 <form onSubmit={handleSubmit}>
-                    {/* <div className="mb-4">
-                        <label className="block text-gray-700">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            required
-                        />
-                    </div> */}
                     <div className="mb-4 relative">
                         <label className="block text-gray-700">New Password</label>
                         <input
