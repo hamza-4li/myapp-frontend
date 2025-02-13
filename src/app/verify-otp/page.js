@@ -15,6 +15,16 @@ export default function VerifyOTP() {
     const [loading, setLoading] = useState(false); // Loading state
     const storedEmail = localStorage.getItem("forgotPasswordEmail"); // geting the email address from the forgot password page
     const mail = storedEmail;
+
+    // ✅ Ensure `localStorage` is accessed only in the browser
+    if (!mail && typeof window !== "undefined") {
+        mail = localStorage.getItem("storedEmail");
+    }
+
+    if (!mail) {
+        console.error("No email found in localStorage.");
+        return;
+    }
     // Resend OTP functionality
     useEffect(() => {
         if (timer > 0) {
@@ -26,15 +36,7 @@ export default function VerifyOTP() {
         } else {
             setShowResend(true); // Show Resend OTP button when timer hits 0
         }
-        // ✅ Ensure `localStorage` is accessed only in the browser
-        if (!mail && typeof window !== "undefined") {
-            mail = localStorage.getItem("storedEmail");
-        }
 
-        if (!mail) {
-            console.error("No email found in localStorage.");
-            return;
-        }
     }, [timer]);
 
 
