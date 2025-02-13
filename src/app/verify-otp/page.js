@@ -25,15 +25,6 @@ export default function VerifyOTP() {
         } else {
             setShowResend(true); // Show Resend OTP button when timer hits 0
         }
-        // ✅ Ensure `localStorage` is accessed only in the browser
-        if (!storedEmail && typeof window !== "undefined") {
-            storedEmail = localStorage.getItem("forgotPasswordEmail");
-        }
-
-        if (!storedEmail) {
-            console.error("No email found in localStorage.");
-            return;
-        }
 
     }, [timer]);
 
@@ -45,8 +36,7 @@ export default function VerifyOTP() {
         setMessage('');
         setError('');
 
-
-
+        const storedEmail = localStorage.getItem("forgotPasswordEmail"); // geting the email address from the forgot password page
         if (!storedEmail) {
             console.error("No email found. Please go back to the forgot-password page.");
             router.push("/forgot-password");
@@ -68,20 +58,22 @@ export default function VerifyOTP() {
         } finally {
             setLoading(false); // Stop loading
         }
+
+        // Function to handle OTP Resend
+        const handleResendOTP = async () => {
+            setShowResend(false); // Hide the resend button
+            setTimer(30); // Reset the timer
+
+            try {
+                await axios.post("https://myapp-backend-production.up.railway.app/api/auth/forgot-password", { email: storedEmail });
+                console.log("OTP Resent Successfully");
+            } catch (error) {
+                console.error("Error resending OTP:", error);
+            }
+        };
     };
 
-    // Function to handle OTP Resend
-    const handleResendOTP = async () => {
-        setShowResend(false); // Hide the resend button
-        setTimer(30); // Reset the timer
 
-        try {
-            await axios.post("https://myapp-backend-production.up.railway.app/api/auth/forgot-password", { email: storedEmail });
-            console.log("OTP Resent Successfully");
-        } catch (error) {
-            console.error("Error resending OTP:", error);
-        }
-    };
 
     return (
         <div className="flex justify-center items-center h-screen bg-gray-100">
