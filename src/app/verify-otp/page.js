@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import BeatLoader from 'react-spinners/BeatLoader';
-import OTPVerification from './verificationOtp';
 
 export default function VerifyOTP() {
     const [email, setEmail] = useState('');
@@ -15,7 +14,7 @@ export default function VerifyOTP() {
     const router = useRouter();
     const [loading, setLoading] = useState(false); // Loading state
     const storedEmail = localStorage.getItem("forgotPasswordEmail"); // geting the email address from the forgot password page
-
+    const mail = storedEmail;
     // Resend OTP functionality
     useEffect(() => {
         if (timer > 0) {
@@ -26,6 +25,15 @@ export default function VerifyOTP() {
             return () => clearInterval(interval);
         } else {
             setShowResend(true); // Show Resend OTP button when timer hits 0
+        }
+        // ✅ Ensure `localStorage` is accessed only in the browser
+        if (!mail && typeof window !== "undefined") {
+            mail = localStorage.getItem("storedEmail");
+        }
+
+        if (!mail) {
+            console.error("No email found in localStorage.");
+            return;
         }
     }, [timer]);
 
@@ -66,7 +74,7 @@ export default function VerifyOTP() {
         setTimer(30); // Reset the timer
 
         try {
-            await axios.post("https://myapp-backend-production.up.railway.app/api/auth/forgot-password", { email: storedEmail });
+            await axios.post("https://myapp-backend-production.up.railway.app/api/auth/forgot-password", { email: mail });
             console.log("OTP Resent Successfully");
         } catch (error) {
             console.error("Error resending OTP:", error);
