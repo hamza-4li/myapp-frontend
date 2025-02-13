@@ -1,16 +1,33 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import BeatLoader from 'react-spinners/BeatLoader';
+import OTPVerification from './verificationOtp';
 
 export default function VerifyOTP() {
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
+    const [timer, setTimer] = useState(30); // Initial timer duration (30 sec)
+    const [showResend, setShowResend] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const router = useRouter();
     const [loading, setLoading] = useState(false); // Loading state
+    const storedEmail = localStorage.getItem("forgotPasswordEmail"); // geting the email address from the forgot password page
+
+    // Resend OTP functionality
+    useEffect(() => {
+        if (timer > 0) {
+            const interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+
+            return () => clearInterval(interval);
+        } else {
+            setShowResend(true); // Show Resend OTP button when timer hits 0
+        }
+    }, [timer]);
 
 
     const handleSubmit = async (e) => {
@@ -18,7 +35,7 @@ export default function VerifyOTP() {
         setMessage('');
         setError('');
 
-        const storedEmail = localStorage.getItem("forgotPasswordEmail"); // geting the email address from the forgot password page
+
 
         if (!storedEmail) {
             console.error("No email found. Please go back to the forgot-password page.");
@@ -40,6 +57,19 @@ export default function VerifyOTP() {
             setError(error.response?.data?.message || 'OTP verification failed.');
         } finally {
             setLoading(false); // Stop loading
+        }
+    };
+
+    // Function to handle OTP Resend
+    const handleResendOTP = async () => {
+        setShowResend(false); // Hide the resend button
+        setTimer(30); // Reset the timer
+
+        try {
+            await axios.post("https://myapp-backend-production.up.railway.app/api/auth/forgot-password", { email: storedEmail });
+            console.log("OTP Resent Successfully");
+        } catch (error) {
+            console.error("Error resending OTP:", error);
         }
     };
 
@@ -73,6 +103,18 @@ export default function VerifyOTP() {
                             loading ? <BeatLoader color='#fff' /> : "Verify OTP"
                         }
                     </button>
+
+                    {/* Resend Password Button */}
+                    {showResend ? (
+                        <button
+                            onClick={handleResendOTP}
+                            className="mt-4 text-blue-500 underline"
+                        >
+                            Resend OTP
+                        </button>
+                    ) : (
+                        <p className="mt-4 text-gray-600">Resend OTP in {timer}s</p>
+                    )}
                 </form>
                 {message && <p className="text-green-500 mt-4 text-center">{message}</p>}
                 {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
